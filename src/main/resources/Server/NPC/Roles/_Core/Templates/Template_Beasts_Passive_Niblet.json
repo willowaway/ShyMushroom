@@ -1,0 +1,712 @@
+{
+  "Type": "Abstract",
+  "KnockbackScale": 0.5,
+  "StartState": "Idle",
+  "Parameters": {
+    "Appearance": {
+      "Value": "Niblet",
+      "Description": "Model to be used"
+    },
+    "IsTameable": {
+      "Value": true,
+      "Description": "Whether or not this entity can be tamed"
+    },
+    "TameItems": {
+      "Value": [ "Plant_Crop_Mushroom_Cap_Red" ],
+      "TypeHint": "String",
+      "Description": "List of items you can use to tame the NPC."
+    },
+    "ViewRange": {
+      "Value": 15,
+      "Description": "View range"
+    },
+    "ViewSector": {
+      "Value": 45,
+      "Description": "View sector"
+    },
+    "HearingRange": {
+      "Value": 15,
+      "Description": "Hearing range"
+    },
+    "AlertedRange": {
+      "Value": 30,
+      "Description": "A range within which the player can be seen/sensed when the NPC is alerted to their presence"
+    },
+    "NapTimeRange": {
+      "Value": [ 15, 30 ],
+      "Description": "How long a daytime nap should last."
+    },
+    "DistractedSenseRange": {
+      "Value": 5,
+      "Description": "Hearing range when distracted by dropped fish"
+    },
+    "AttractiveItems": {
+      "Value": [ ],
+      "TypeHint": "String",
+      "Description": "Item to look for in players hand"
+    },
+    "WanderRadius": {
+      "Value": 10,
+      "Description": "Wander Radius"
+    },
+    "MotionWander1Timer": {
+      "Value": [ 4, 8 ],
+      "Description": "How long the NPC will perform the Wander motion for, in seconds"
+    },
+    "MotionWander2Timer": {
+      "Value": [ 1, 2],
+      "Description": "How long the NPC will perform the WanderInCircle motion for, in seconds"
+    },
+    "MotionNothingTimer": {
+      "Value": [ 1, 2 ],
+      "Description": "How long the NPC will stop for between wandering motions, in seconds"
+    },
+    "DropList": {
+      "Value": "Empty",
+      "Description": "Drop items"
+    },
+    "MaxSpeed": {
+      "Value": 9,
+      "Description": "Max NPC walk speed"
+    },
+    "AttitudeGroup": {
+      "Value": "Critters",
+      "Description": "This NPCs attitude group"
+    },
+    "DefaultPlayerAttitude": {
+      "Value": "Neutral",
+      "Description": "Default attitude towards players"
+    },
+    "MaxHealth": {
+      "Value": 1,
+      "Description": "Max health for the NPC"
+    },
+    "FlockArray": {
+      "Value": [ ],
+      "TypeHint": "String",
+      "Description": "Array containing NPCs for this flock type"
+    },
+    "IsMemory": {
+      "Value": false,
+      "Description": "Defines if the NPC is a memory"
+    },
+    "MemoriesCategory": {
+      "Value": "Other",
+      "Description": "Defines the category of the memory"
+    },
+    "MemoriesNameOverride": {
+      "Value": "",
+      "Description": "Overrides the memory name if set"
+    },
+    "NameTranslationKey": {
+      "Value": "server.npcRoles.Template.name",
+      "Description": "Translation key for NPC name display"
+    },
+    "AlwaysSleepAtNight": {
+      "Value": true,
+      "Description": "Whether this NPC always sleeps through the whole night."
+    },
+    "IdleMotionComponent": {
+      "Value": "Component_Instruction_Intelligent_Idle_Motion_Configurable_Leashed_Wander",
+      "Description": "The component that controls how the NPC moves during idle state"
+    }
+  },
+  "IsMemory": { "Compute": "IsMemory" },
+  "MemoriesCategory": { "Compute": "MemoriesCategory" },
+  "MemoriesNameOverride": { "Compute": "MemoriesNameOverride" },
+  "FlockSpawnTypes": { "Compute": "FlockArray" },
+  "DropList": { "Compute": "DropList" },
+  "Appearance": { "Compute": "Appearance" },
+  "DisableDamageGroups": [ "Self" ],
+  "DefaultNPCAttitude": "Ignore",
+  "DefaultPlayerAttitude": { "Compute": "DefaultPlayerAttitude" },
+  "AttitudeGroup": { "Compute": "AttitudeGroup" },
+  "MotionControllerList": [
+    {
+      "Type": "Walk",
+      "MaxWalkSpeed": { "Compute": "MaxSpeed" },
+      "Gravity": 10,
+      "MaxFallSpeed": 8,
+      "Acceleration": 10,
+      "MaxRotationSpeed": 180
+    }
+  ],
+  "StateTransitions": [
+    {
+      "States": [
+        {
+          "From": [ "Idle" ],
+          "To": [ "Sleep" ]
+        }
+      ],
+      "Actions": {
+        "Reference": "Component_ActionList_Sleep"
+      }
+    },
+    {
+      "States": [
+        {
+          "From": [ "Sleep" ],
+          "To": [ "Alerted", "Flee", "Idle" ]
+        }
+      ],
+      "Actions": {
+        "Reference": "Component_ActionList_Wake"
+      }
+    },
+    {
+      "$Comment": "Always clear animation when moving from Alerted or Flee state.",
+      "States": [
+        {
+          "To": [ ],
+          "From": [ "Alerted", "Flee" ]
+        }
+      ],
+      "Actions": [
+        {
+          "Type": "PlayAnimation",
+          "Slot": "Status"
+        },
+        {
+          "Type": "SetFlag",
+          "Name": "AnimationBlock",
+          "SetTo": false
+        }
+      ]
+    },
+    {
+      "$Comment": "Always clear target and reset instructions when going back to idle.",
+      "States": [
+        {
+          "To": [ "Idle" ],
+          "From": [ ]
+        }
+      ],
+      "Actions": [
+        {
+          "Type": "ReleaseTarget"
+        },
+        {
+          "Type": "ResetInstructions"
+        },
+        {
+          "Type": "PlayAnimation",
+          "Slot": "Status"
+        }
+      ]
+    },
+    {
+      "$Comment": "Clear idle anims",
+      "States": [
+        {
+          "To": [ ],
+          "From": [ "Idle" ]
+        }
+      ],
+      "Actions": [
+        {
+          "Type": "PlayAnimation",
+          "Slot": "Status"
+        }
+      ]
+    }
+  ],
+  "MaxHealth": { "Compute": "MaxHealth" },
+  "Instructions": [
+    {
+      "Instructions": [
+        {
+          "Sensor": {
+            "Type": "State",
+            "State": "Idle"
+          },
+          "Instructions": [
+            {
+              "Reference": "Component_Instruction_Clear_Status_Animation"
+            },
+            {
+              "Reference": "Component_Instruction_Damage_Check",
+              "Modify": {
+                "_ExportStates": [ "Flee", "Panic" ],
+                "AlertedRange": { "Compute": "AlertedRange" }
+              }
+            },
+            {
+              "Sensor": {
+                "$Comment": "Only run when not tamed",
+                "Type": "Tamed",
+                "IsTamed": false
+              },
+              "Instructions": [
+                {
+                  "Sensor": {
+                    "Type": "Or",
+                    "Sensors": [
+                      {
+                        "Type": "Player",
+                        "Range": 4,
+                        "LockOnTarget": false,
+                        "Filters": [
+                          {
+                            "Type": "LineOfSight"
+                          }
+                        ]
+                      },
+                      {
+                        "Reference": "Component_Sensor_Sight_By_Attitude",
+                        "Modify": {
+                          "ViewRange": { "Compute": "ViewRange" },
+                          "ViewSector": { "Compute": "ViewSector" },
+                          "Attitudes": [ "Hostile", "Neutral" ]
+                        }
+                      }
+                    ]
+                  },
+                  "Actions": [
+                    {
+                      "Type": "State",
+                      "State": "Alerted"
+                    },
+                    {
+                      "Type": "Timeout",
+                      "Delay": [ 1, 1 ]
+                    }
+                  ]
+                },
+                {
+                  "Enabled": { "Compute": "AlwaysSleepAtNight" },
+                  "Actions": [
+                    {
+                      "Type": "Timeout",
+                      "Delay": [ 1, 2 ],
+                      "Action": {
+                        "Type": "Sequence",
+                        "Actions": [
+                          {
+                            "Type": "State",
+                            "State": "Sleep"
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "Sensor": {
+                "$Comment": "Only run when IS tamed",
+                "Type": "Tamed",
+                "IsTamed": true
+              },
+              "Instructions": [
+                {
+                  "Sensor": {
+                    "Type": "State",
+                    "State": ".Follow"
+                  },
+                  "Instructions": [
+                    {
+                      "Sensor": {
+                        "Type": "Player",
+                        "Range": 10,
+                        "LockOnTarget": true
+                      },
+                      "Instructions": [
+                        {
+                          "$Comment": "Strafe when grouped up",
+                          "Sensor": {
+                            "Type": "Mob",
+                            "Range": 2,
+                            "ExcludeOwnType": false,
+                            "LockOnTarget": false,
+                            "Filters": [
+                              {
+                                "Type": "NPCGroup",
+                                "IncludeGroups": [ "Self" ]
+                              },
+                              {
+                                "Type": "ViewSector",
+                                "ViewSector": 35
+                              }
+                            ]
+                          },
+                          "BodyMotion": {
+                            "Type": "MaintainDistance",
+                            "DesiredDistanceRange": [ 2, 3 ],
+                            "StrafingDurationRange": [ 1, 2 ],
+                            "StrafingFrequencyRange": [ 1, 1 ],
+                            "MoveThreshold": 0.5,
+                            "RelativeForwardsSpeed": 0.75,
+                            "RelativeBackwardsSpeed": 0.25
+                          }
+                        },
+                        {
+                          "Sensor": {
+                            "Type": "Target"
+                          },
+                          "BodyMotion": {
+                            "Type": "Seek",
+                            "SlowDownDistance": 5,
+                            "StopDistance": 3,
+                            "RelativeSpeed": 0.5
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "Sensor": {
+                        "Type": "Target",
+                        "Range": 20
+                      },
+                      "BodyMotion": {
+                        "Type": "Seek",
+                        "SlowDownDistance": 5,
+                        "StopDistance": 3,
+                        "RelativeSpeed": 1
+                      }
+                    },
+                    {
+                      "Sensor": {
+                        "Type": "Target"
+                      },
+                      "BodyMotion": {
+                        "Type": "Teleport",
+                        "OffsetRange": [ 2, 2 ],
+                        "MaxYOffset": 2
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Sensor": {
+            "Type": "State",
+            "State": "Alerted"
+          },
+          "Instructions": [
+            {
+              "Reference": "Component_Instruction_Generic_Alerted",
+              "Modify": {
+                "_ExportStates": [ "Flee", "Flee", "Flee" ],
+                "AlertedRange": { "Compute": "AlertedRange" },
+                "WaitTime": [ 0.5, 0.75 ]
+              }
+            }
+          ]
+        },
+        {
+          "Sensor": {
+            "Type": "State",
+            "State": "Flee"
+          },
+          "Instructions": [
+            {
+              "Reference": "Component_Instruction_Clear_Status_Animation",
+              "Modify": { }
+            },
+            {
+              "Reference": "Component_Instruction_Damage_Check",
+              "Modify": {
+                "_ExportStates": [ "Panic", "Panic" ],
+                "AlertedRange": { "Compute": "AlertedRange" }
+              }
+            },
+            {
+              "Sensor": {
+                "Type": "Or",
+                "Sensors": [
+                  {
+                    "Reference": "Component_Sensor_Sight_By_Attitude",
+                    "Modify": {
+                      "ViewRange": { "Compute": "ViewRange + 5" },
+                      "ViewSector": { "Compute": "ViewSector" },
+                      "Attitudes": [ "Hostile", "Neutral" ]
+                    }
+                  },
+                  {
+                    "Reference": "Component_Sensor_Sound_By_Attitude",
+                    "Modify": {
+                      "HearingRange": { "Compute": "HearingRange" },
+                      "ThroughWalls": false,
+                      "Attitudes": [ "Hostile", "Neutral" ]
+                    }
+                  }
+                ]
+              },
+              "BodyMotion": {
+                "Type": "Flee",
+                "SlowDownDistance": { "Compute": "ViewRange + 2" },
+                "StopDistance": { "Compute": "ViewRange + 5" },
+                "RelativeSpeed": 0.5
+              }
+            },
+            {
+              "Actions": [
+                {
+                  "Type": "State",
+                  "State": "Idle"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Sensor": {
+            "Type": "State",
+            "State": "Panic"
+          },
+          "Instructions": [
+            {
+              "ActionsBlocking": true,
+              "Actions": [
+                {
+                  "Type": "Timeout",
+                  "Delay": [ 5, 8 ]
+                },
+                {
+                  "Type": "State",
+                  "State": "Idle"
+                }
+              ],
+              "BodyMotion": {
+                "Type": "WanderInCircle",
+                "Radius": { "Compute": "AlertedRange" },
+                "MaxHeadingChange": 90,
+                "RelativeSpeed": 1
+              }
+            }
+          ]
+        },
+        {
+          "Sensor": {
+            "Type": "State",
+            "State": "Sleep"
+          },
+          "Instructions": [
+            {
+              "$Comment": "Start the nap timer",
+              "Continue": true,
+              "Sensor": {
+                "Type": "Any",
+                "Once": false
+              },
+              "Actions": [
+                {
+                  "Type": "TimerStart",
+                  "Name": "NapTimer",
+                  "StartValueRange": { "Compute": "NapTimeRange" },
+                  "RestartValueRange": { "Compute": "NapTimeRange" }
+                },
+                {
+                  "Type": "TimerRestart",
+                  "Name": "NapTimer"
+                }
+              ]
+            },
+            {
+              "Reference": "Component_Instruction_Wild_Sleep_State",
+              "Modify": {
+                "_ExportStates": [ "Idle", "Panic", "Alerted", "Flee" ],
+                "AlertedRange": { "Compute": "AlertedRange" },
+                "WakeupSensor": "Component_Sensor_Timed_Nap"
+              }
+            }
+          ]
+        },
+        {
+          "$Comment": "Interaction state - look at player while Interacting",
+          "Sensor": {
+            "Type": "State",
+            "State": "$Interaction"
+          },
+          "Instructions": [
+            {
+              "Continue": true,
+              "Sensor": {
+                "Type": "Target",
+                "Range": 10
+              },
+              "HeadMotion": {
+                "Type": "Watch"
+              }
+            },
+            {
+              "$Comment": "Return to Idle after interaction ends",
+              "Sensor": {
+                "Type": "Any"
+              },
+              "Actions": [
+                {
+                  "Type": "Timeout",
+                  "Delay": [ 1, 1 ],
+                  "Action": {
+                    "Type": "Sequence",
+                    "Actions": [
+                      {
+                        "Type": "ReleaseTarget"
+                      },
+                      {
+                        "Type": "State",
+                        "State": "Idle.Follow"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "InteractionInstruction": {
+    "Enabled": {
+      "Compute": "IsTameable"
+    },
+    "Instructions": [
+      {
+        "Sensor": {
+          "$Comment": "Exit first if not Tameable with TameItems in Hand. Checks this first before everything first to avoid extra work",
+          "Type": "Not",
+          "Sensor": {
+            "Type": "Or",
+            "Sensors": [
+              {
+                "Enabled": {"Compute": "IsTameable" },
+                "Type": "And",
+                "Sensors": [
+                  {
+                    "Type": "Target",
+                    "Filters": [
+                      {
+                        "Type": "ItemInHand",
+                        "Items": {
+                          "Compute": "TameItems"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "Type": "Not",
+                    "Sensor": {
+                      "Type": "State",
+                      "State": "Panic"
+                    }
+                  },
+                  {
+                    "Type": "CanInteract",
+                    "ViewSector": 360,
+                    "Attitudes": [
+                      "Neutral",
+                      "Friendly",
+                      "Revered"
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "Actions": [
+          {
+            "Type": "SetInteractable",
+            "Interactable": false
+          }
+        ]
+      },
+      {
+        "Enabled": {"Compute": "IsTameable" },
+        "Continue": true,
+        "Sensor": {
+          "$Comment": "Set Tameable to true when Item in Hand is one of TameItems and NPC is not already tamed",
+          "Type": "And",
+          "Sensors": [
+            {
+              "Type": "Tamed",
+              "IsTamed": false
+            },
+            {
+              "Type": "Target",
+              "Filters": [
+                {
+                  "Type": "ItemInHand",
+                  "Items": {
+                    "Compute": "TameItems"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "Actions": [
+          {
+            "Type": "SetInteractable",
+            "Interactable": true,
+            "Hint": "server.interactionHints.tame"
+          }
+        ]
+      },
+      {
+        "Enabled": {"Compute": "IsTameable" },
+        "Sensor": {
+          "$Comment": "When Interacting, Consume Item from Player Hand, Play Hearts Particle Effects, Set Attitude",
+          "Type": "And",
+          "Sensors": [
+            {
+              "Type": "Tamed",
+              "IsTamed": false
+            },
+            {
+              "Type": "Target",
+              "Filters": [
+                {
+                  "Type": "ItemInHand",
+                  "Items": {
+                    "Compute": "TameItems"
+                  }
+                }
+              ]
+            },
+            {
+              "Type": "HasInteracted"
+            }
+          ]
+        },
+        "Actions": [
+          {
+            "Type": "ConsumeHeldItem"
+          },
+          {
+            "Type": "LockOnInteractionTarget"
+          },
+          {
+            "Type": "State",
+            "State": "$Interaction"
+          },
+          {
+            "Type": "SpawnParticles",
+            "Offset": [
+              0,
+              0.75,
+              0
+            ],
+            "ParticleSystem": "Hearts"
+          },
+          {
+            "Type": "SetInteractable",
+            "Interactable": false
+          },
+          {
+            "Type": "Tame",
+            "TameItems": { "Compute": "TameItems" }
+          }
+        ]
+      }
+    ]
+  },
+  "NameTranslationKey": { "Compute": "NameTranslationKey" }
+}

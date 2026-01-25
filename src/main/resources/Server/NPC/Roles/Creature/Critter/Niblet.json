@@ -1,0 +1,21 @@
+{
+  "Type": "Variant",
+  "Reference": "Template_Beasts_Passive_Niblet",
+  "Modify": {
+    "Appearance": "Niblet",
+    "DropList": "Drop_Niblet",
+    "MaxHealth": 5,
+    "IsMemory": true,
+    "MemoriesCategory": "Critter",
+    "NameTranslationKey": {
+      "Compute": "NameTranslationKey"
+    },
+    "AlwaysSleepAtNight": true
+  },
+  "Parameters": {
+    "NameTranslationKey": {
+      "Value": "server.npcRoles.Niblet.name",
+      "Description": "Translation key for NPC name display"
+    }
+  }
+}

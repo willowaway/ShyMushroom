@@ -18,6 +18,8 @@ repositories {
     }
 }
 
+val lombokVersion = "1.18.40"
+
 dependencies {
     compileOnly(libs.jetbrains.annotations)
     compileOnly(libs.jspecify)
@@ -28,6 +30,13 @@ dependencies {
         // Optional: Print a warning so you know why it's missing
         logger.warn("Hytale Assets.zip not found at: ${hytaleAssets.absolutePath}")
     }
+
+    // Lombok
+    compileOnly("org.projectlombok:lombok:$lombokVersion")
+    annotationProcessor("org.projectlombok:lombok:$lombokVersion")
+
+    testCompileOnly("org.projectlombok:lombok:$lombokVersion")
+    testAnnotationProcessor("org.projectlombok:lombok:$lombokVersion")
 }
 
 java {
@@ -118,14 +127,14 @@ val syncAssets = tasks.register<Copy>("syncAssets") {
     }
 }
 
-afterEvaluate {
-    // Now Gradle will find it, because the plugin has finished working
-    val targetTask = tasks.findByName("runServer") ?: tasks.findByName("server")
-
-    if (targetTask != null) {
-        targetTask.finalizedBy(syncAssets)
-        logger.lifecycle("✅ specific task '${targetTask.name}' hooked for auto-sync.")
-    } else {
-        logger.warn("⚠️ Could not find 'runServer' or 'server' task to hook auto-sync into.")
-    }
-}
+//afterEvaluate {
+//    // Now Gradle will find it, because the plugin has finished working
+//    val targetTask = tasks.findByName("runServer") ?: tasks.findByName("server")
+//
+//    if (targetTask != null) {
+//        targetTask.finalizedBy(syncAssets)
+//        logger.lifecycle("✅ specific task '${targetTask.name}' hooked for auto-sync.")
+//    } else {
+//        logger.warn("⚠️ Could not find 'runServer' or 'server' task to hook auto-sync into.")
+//    }
+//}
