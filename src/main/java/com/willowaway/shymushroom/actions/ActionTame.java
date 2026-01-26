@@ -12,7 +12,6 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.npc.asset.builder.BuilderSupport;
-import com.hypixel.hytale.server.npc.config.AttitudeGroup;
 import com.hypixel.hytale.server.npc.corecomponents.ActionBase;
 import com.hypixel.hytale.server.npc.entities.NPCEntity;
 import com.hypixel.hytale.server.npc.role.Role;
@@ -22,14 +21,12 @@ import com.willowaway.shymushroom.NibletPlugin;
 import com.willowaway.shymushroom.builders.BuilderActionTame;
 import com.willowaway.shymushroom.component.PetComponent;
 import com.willowaway.shymushroom.component.TameComponent;
-import com.willowaway.shymushroom.model.Pet;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-import java.util.logging.Level;
 
 public class ActionTame extends ActionBase {
     protected final Set<String> tameItems;

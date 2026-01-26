@@ -95,7 +95,7 @@
       "Description": "Defines the category of the memory"
     },
     "MemoriesNameOverride": {
-      "Value": "",
+      "Value": "Niblet",
       "Description": "Overrides the memory name if set"
     },
     "NameTranslationKey": {

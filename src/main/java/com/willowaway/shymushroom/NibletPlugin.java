@@ -15,10 +15,8 @@ import com.hypixel.hytale.server.core.modules.entity.component.TransformComponen
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
-import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import com.hypixel.hytale.server.core.util.Config;
 import com.hypixel.hytale.server.npc.NPCPlugin;
 import com.hypixel.hytale.server.npc.entities.NPCEntity;
 import com.hypixel.hytale.server.npc.role.Role;
@@ -28,10 +26,7 @@ import com.willowaway.shymushroom.builders.BuilderActionTame;
 import com.willowaway.shymushroom.builders.BuilderSensorTamed;
 import com.willowaway.shymushroom.component.PetComponent;
 import com.willowaway.shymushroom.component.TameComponent;
-import com.willowaway.shymushroom.config.PetConfig;
-import com.willowaway.shymushroom.model.Pet;
 import com.willowaway.shymushroom.systems.TameSystem;
-import com.willowaway.shymushroom.util.PetHelper;
 import it.unimi.dsi.fastutil.Pair;
 import lombok.Getter;
 
@@ -45,7 +40,6 @@ public class NibletPlugin extends JavaPlugin {
     public static ComponentType<EntityStore, TameComponent> tameComponent;
     public static ComponentType<EntityStore, PetComponent> petComponent;
     private static final Field ATTITUDE_FIELD;
-    public final Config<PetConfig> config;
     @Getter
     private static NibletPlugin instance;
 
@@ -57,7 +51,6 @@ public class NibletPlugin extends JavaPlugin {
         super(init);
         instance = this;
         LOGGER.atInfo().log("Hello from %s version %s", this.getName(), this.getManifest().getVersion().toString());
-        this.config = this.withConfig("PetConfig", PetConfig.CODEC);
     }
 
     @Override
@@ -73,10 +66,6 @@ public class NibletPlugin extends JavaPlugin {
 
     @Override
     protected void start(){
-        this.config.save();
-        PetConfig config = this.config.get();
-        PetHelper.setup(config);
-
         LOGGER.atInfo().log("Registering Niblet Tame System");
         ComponentType<EntityStore, NPCEntity> npcComponentType = NPCEntity.getComponentType();
         if (npcComponentType == null) {
@@ -105,13 +94,6 @@ public class NibletPlugin extends JavaPlugin {
             return;
         }
 
-        UUID playerId = player.getUuid();
-        if (playerId == null) {
-            LOGGER.atSevere().log("Failed to spawn pet: playerId was null");
-            return;
-        }
-        LOGGER.atInfo().log("Player added to world: " + world.getName() + ". Player: " + playerId + ", spawning Niblet as pet");
-
         Ref<EntityStore> playerEntityRef = player.getReference();
         if (playerEntityRef == null) {
             LOGGER.atSevere().log("Failed to spawn pet: playerEntityRef was null");
@@ -129,6 +111,15 @@ public class NibletPlugin extends JavaPlugin {
             LOGGER.atSevere().log("Failed to spawn pet: playerTransform cannot be null");
             return;
         }
+
+        UUIDComponent playerIdComp = store.getComponent(playerEntityRef, UUIDComponent.getComponentType());
+        if (playerIdComp == null) {
+            LOGGER.atSevere().log("Failed to spawn pet: playerIdComp cannot be null");
+            return;
+        }
+
+        UUID playerId = playerIdComp.getUuid();
+        LOGGER.atInfo().log("Player added to world: " + world.getName() + ". Player: " + playerId + ", spawning Niblet as pet");
 
         Vector3d spawnPos = playerTransform.getPosition().add(new Vector3d(1, 0, 1));
         Vector3f spawnRotation = new Vector3f();
@@ -184,11 +175,6 @@ public class NibletPlugin extends JavaPlugin {
                 return;
             }
             petComponent.set(entityID, world.getName(), "Nib");
-
-//            Pet pet = new Pet(playerId, entityID, world.getName(), "Nib");
-//            NibletPlugin.getInstance().config.get().getPetsByPlayerId().put(String.valueOf(playerId), pet);
-//            NibletPlugin.getInstance().config.save();
-
             LOGGER.atInfo().log("Successfully spawned pet Niblet and set owner to " + playerId);
 
             NPCEntity npcEntity = spawnResult.second();
