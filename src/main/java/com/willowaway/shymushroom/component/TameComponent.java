@@ -24,22 +24,14 @@ public class TameComponent implements Component<EntityStore> {
                     tameComponent -> tameComponent.isTame
             )
             .documentation("Is entity tamed").add()
-            .append(
-                    new KeyedCodec<>("TamedByPlayerId", Codec.UUID_BINARY),
-                    (tameComponent, tamedByPlayerId) -> tameComponent.tamedByPlayerId = tamedByPlayerId,
-                    tameComponent -> tameComponent.tamedByPlayerId
-            )
-            .documentation("The player id who tamed this entity").add()
             .build();
 
     private Boolean isTame = false;
-    private UUID tamedByPlayerId = null;
 
     @Override
     public @Nullable Component<EntityStore> clone() {
         TameComponent tameComponent = new TameComponent();
         tameComponent.isTame = this.isTame;
-        tameComponent.tamedByPlayerId = this.tamedByPlayerId;
         return tameComponent;
     }
 
@@ -49,14 +41,9 @@ public class TameComponent implements Component<EntityStore> {
 
     public void setIsTameByPlayer(@Nonnull UUID playerId) {
         this.isTame = true;
-        this.tamedByPlayerId = playerId;
     }
 
     public boolean isTame() {
         return Boolean.TRUE.equals(this.isTame);
-    }
-
-    public UUID getTamedByPlayerId() {
-        return this.tamedByPlayerId;
     }
 }

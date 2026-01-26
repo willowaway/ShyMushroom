@@ -20,6 +20,7 @@ import com.hypixel.hytale.server.npc.role.support.WorldSupport;
 import com.hypixel.hytale.server.npc.sensorinfo.InfoProvider;
 import com.willowaway.shymushroom.NibletPlugin;
 import com.willowaway.shymushroom.builders.BuilderActionTame;
+import com.willowaway.shymushroom.component.PetComponent;
 import com.willowaway.shymushroom.component.TameComponent;
 import com.willowaway.shymushroom.model.Pet;
 
@@ -63,8 +64,8 @@ public class ActionTame extends ActionBase {
             return false;
         }
 
-        UUIDComponent playerRefStoreUUIDComp = store.getComponent(refEntityStore, UUIDComponent.getComponentType());
-        if (playerRefStoreUUIDComp == null) {
+        UUIDComponent playerIdComp = store.getComponent(refEntityStore, UUIDComponent.getComponentType());
+        if (playerIdComp == null) {
             return false;
         }
 
@@ -94,11 +95,10 @@ public class ActionTame extends ActionBase {
             return false;
         }
 
-        UUID playerId = playerRefStoreUUIDComp.getUuid();
+        UUID playerId = playerIdComp.getUuid();
         tameComponent.setIsTameByPlayer(playerId);
-        Pet pet = new Pet(playerId, petId.getUuid(), world.getName(), "Nib");
-        NibletPlugin.getInstance().config.get().setPetByPlayerId(String.valueOf(playerId), pet);
-        NibletPlugin.getInstance().config.save();
+        PetComponent petComponent =  store.ensureAndGetComponent(refEntityStore, PetComponent.getComponentType());
+        petComponent.set(petId.getUuid(), world.getName(), "Nib");
 
         try {
             NibletPlugin.getAttitudeField().set(worldSupport, Attitude.REVERED);

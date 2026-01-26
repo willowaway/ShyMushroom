@@ -26,6 +26,7 @@ import com.hypixel.hytale.server.npc.role.support.WorldSupport;
 import com.willowaway.shymushroom.builders.BuilderActionConsumeHeldItem;
 import com.willowaway.shymushroom.builders.BuilderActionTame;
 import com.willowaway.shymushroom.builders.BuilderSensorTamed;
+import com.willowaway.shymushroom.component.PetComponent;
 import com.willowaway.shymushroom.component.TameComponent;
 import com.willowaway.shymushroom.config.PetConfig;
 import com.willowaway.shymushroom.model.Pet;
@@ -42,6 +43,7 @@ public class NibletPlugin extends JavaPlugin {
 
     private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
     public static ComponentType<EntityStore, TameComponent> tameComponent;
+    public static ComponentType<EntityStore, PetComponent> petComponent;
     private static final Field ATTITUDE_FIELD;
     public final Config<PetConfig> config;
     @Getter
@@ -62,6 +64,7 @@ public class NibletPlugin extends JavaPlugin {
     protected void setup() {
         LOGGER.atInfo().log("Registering Tame Component");
         tameComponent = this.getEntityStoreRegistry().registerComponent(TameComponent.class, "Tame", TameComponent.CODEC);
+        petComponent = this.getEntityStoreRegistry().registerComponent(PetComponent.class, "Pet", PetComponent.CODEC);
         LOGGER.atInfo().log("Registering on Player Ready Event");
         this.getEventRegistry().registerGlobal(PlayerReadyEvent.class, this::onPlayerReady);
         LOGGER.atInfo().log("Registering on Player Disconnect Event");
@@ -174,9 +177,17 @@ public class NibletPlugin extends JavaPlugin {
                 return;
             }
             tameComponent.setIsTameByPlayer(playerId);
-            Pet pet = new Pet(playerId, entityID, world.getName(), "Nib");
-            NibletPlugin.getInstance().config.get().getPetsByPlayerId().put(String.valueOf(playerId), pet);
-            NibletPlugin.getInstance().config.save();
+
+            PetComponent petComponent = worldStore.getComponent(playerEntityRef, PetComponent.getComponentType());
+            if (petComponent == null) {
+                LOGGER.atSevere().log("Failed to spawn pet: Pet Component was null");
+                return;
+            }
+            petComponent.set(entityID, world.getName(), "Nib");
+
+//            Pet pet = new Pet(playerId, entityID, world.getName(), "Nib");
+//            NibletPlugin.getInstance().config.get().getPetsByPlayerId().put(String.valueOf(playerId), pet);
+//            NibletPlugin.getInstance().config.save();
 
             LOGGER.atInfo().log("Successfully spawned pet Niblet and set owner to " + playerId);
 
@@ -199,37 +210,33 @@ public class NibletPlugin extends JavaPlugin {
 
     private void onPlayerDisconnect(@Nonnull PlayerDisconnectEvent event) {
         PlayerRef playerRef = event.getPlayerRef();
-        UUID playerId = playerRef.getUuid();
-        Pet pet = config.get().getPetByPlayerId(playerId);
-
-        if (pet == null) {
-            LOGGER.atSevere().log("On Player Disconnect failed to get pet from PetHelper");
+        if (!playerRef.isValid()) {
+            LOGGER.atSevere().log("Failed to despawn pet: playerRef was not valid");
             return;
         }
 
-        LOGGER.atInfo().log("On Player Disconnect: %s", pet.getName());
-        UUID petEntityId = pet.getEntityId();
-        String worldName = pet.getWorldName();
-
-        Universe universe = Universe.get();
-        if (universe == null) {
+        Ref<EntityStore> playerEntityRef = playerRef.getReference();
+        if (playerEntityRef == null) {
+            LOGGER.atSevere().log("Failed to despawn pet: playerEntityRef was null");
             return;
         }
 
-        World world = worldName != null ? universe.getWorld(worldName) : null;
-        if (world == null) {
-            LOGGER.atSevere().log("On Player Disconnect failed to get world: %s. For pet: %s", worldName, pet.getName());
-            return;
-        }
-        Ref<EntityStore> entityRef = world.getEntityStore().getRefFromUUID(petEntityId);
+        Store<EntityStore> store = playerEntityRef.getStore();
+        World world = store.getExternalData().getWorld();
 
         world.execute(() -> {
+            PetComponent petComponent = store.getComponent(playerEntityRef, PetComponent.getComponentType());
+            if (petComponent == null) {
+                LOGGER.atInfo().log("On Player Disconnect: Failed to get Pet Component");
+                return;
+            }
+            Ref<EntityStore> entityRef = world.getEntityStore().getRefFromUUID(petComponent.getEntityId());
+
             if (entityRef != null && entityRef.isValid()) {
-                Store<EntityStore> store = world.getEntityStore().getStore();
                 store.removeEntity(entityRef, RemoveReason.REMOVE);
-                LOGGER.atInfo().log("On Player Disconnect successfully removed pet %s from the world", pet.getName());
+                LOGGER.atInfo().log("On Player Disconnect successfully removed pet %s from the world", petComponent.getName());
             } else {
-                LOGGER.atSevere().log("On Player Disconnect failed: entityRef was null or invalid for petEntityId: %s", petEntityId);
+                LOGGER.atSevere().log("On Player Disconnect failed: entityRef was null or invalid for petEntityId: %s", petComponent.getEntityId());
             }
         });
     }
