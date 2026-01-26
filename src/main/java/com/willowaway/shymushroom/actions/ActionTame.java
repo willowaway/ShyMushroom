@@ -29,6 +29,7 @@ import java.util.Set;
 import java.util.UUID;
 
 public class ActionTame extends ActionBase {
+
     protected final Set<String> tameItems;
     private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
 
