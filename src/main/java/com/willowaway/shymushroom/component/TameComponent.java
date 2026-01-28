@@ -13,6 +13,9 @@ import javax.annotation.Nonnull;
 import java.util.UUID;
 
 public class TameComponent implements Component<EntityStore> {
+
+    // CODECs are a mechanism for serializing and deserializing data to and from JSON
+    // CODECS define how data is structured
     @Nonnull
     public static final BuilderCodec<TameComponent> CODEC = BuilderCodec.builder(TameComponent.class, TameComponent::new)
             .append(
@@ -26,7 +29,7 @@ public class TameComponent implements Component<EntityStore> {
     private Boolean isTame = false;
 
     @Override
-    public @Nullable Component<EntityStore> clone() {
+    public Component<EntityStore> clone() {
         TameComponent tameComponent = new TameComponent();
         tameComponent.isTame = this.isTame;
         return tameComponent;
