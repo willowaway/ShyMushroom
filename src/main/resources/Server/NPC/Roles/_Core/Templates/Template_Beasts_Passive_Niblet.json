@@ -688,15 +688,6 @@
             "State": "$Interaction"
           },
           {
-            "Type": "SpawnParticles",
-            "Offset": [
-              0,
-              0.75,
-              0
-            ],
-            "ParticleSystem": "Hearts"
-          },
-          {
             "Type": "SetInteractable",
             "Interactable": false
           },

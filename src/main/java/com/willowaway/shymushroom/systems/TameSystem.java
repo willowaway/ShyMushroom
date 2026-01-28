@@ -50,8 +50,7 @@ public class TameSystem extends HolderSystem<EntityStore> {
         }
 
         Role role = npcEntity.getRole();
-        if (role == null){
-            LOGGER.atInfo().log("TameSystem failed to get role for npcEntity with TypeIndex: %d", npcEntity.getNPCTypeIndex());
+        if (role == null || !role.getRoleName().equals("Niblet")){
             return;
         }
 
