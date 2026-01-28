@@ -7,6 +7,8 @@ import com.hypixel.hytale.component.Component;
 import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.willowaway.shymushroom.NibletPlugin;
+import lombok.Getter;
+import lombok.Setter;
 import org.jspecify.annotations.Nullable;
 
 import javax.annotation.Nonnull;
@@ -26,7 +28,10 @@ public class TameComponent implements Component<EntityStore> {
             .documentation("Is entity tamed").add()
             .build();
 
+    @Setter
+    @Getter
     private Boolean isTame = false;
+
 
     @Override
     public Component<EntityStore> clone() {
@@ -37,13 +42,5 @@ public class TameComponent implements Component<EntityStore> {
 
     public static ComponentType<EntityStore, TameComponent> getComponentType() {
         return NibletPlugin.tameComponent;
-    }
-
-    public void setIsTameByPlayer(@Nonnull UUID playerId) {
-        this.isTame = true;
-    }
-
-    public boolean isTame() {
-        return Boolean.TRUE.equals(this.isTame);
     }
 }

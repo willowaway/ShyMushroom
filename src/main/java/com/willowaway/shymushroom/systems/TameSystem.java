@@ -9,6 +9,7 @@ import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.component.system.HolderSystem;
 import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.server.core.asset.type.attitude.Attitude;
+import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.npc.config.AttitudeGroup;
 import com.hypixel.hytale.server.npc.entities.NPCEntity;
@@ -16,10 +17,12 @@ import com.hypixel.hytale.server.npc.role.Role;
 import com.hypixel.hytale.server.npc.role.support.WorldSupport;
 import com.hypixel.hytale.server.npc.systems.RoleBuilderSystem;
 import com.willowaway.shymushroom.NibletPlugin;
+import com.willowaway.shymushroom.component.PetComponent;
 import com.willowaway.shymushroom.component.TameComponent;
 
 import javax.annotation.Nonnull;
 import java.util.Set;
+import java.util.UUID;
 import java.util.logging.Level;
 
 public class TameSystem extends HolderSystem<EntityStore> {
@@ -59,7 +62,7 @@ public class TameSystem extends HolderSystem<EntityStore> {
         }
 
         TameComponent tameComponent = holder.ensureAndGetComponent(this.tameComponentType);
-        if (tameComponent.isTame()) {
+        if (tameComponent.getIsTame()) {
             try {
                 NibletPlugin.getAttitudeField().set(worldSupport, Attitude.REVERED);
             } catch (IllegalAccessException e) {
@@ -69,7 +72,7 @@ public class TameSystem extends HolderSystem<EntityStore> {
             // Spawning no longer needs to be tracked for this entity
             boolean oldState = npcEntity.updateSpawnTrackingState(false);
             if (oldState) {
-                LOGGER.atInfo().log("Stopped tracking entity " + npcEntity.getRoleName(), Level.INFO);
+                LOGGER.atInfo().log("Stopped tracking entity spawning " + npcEntity.getRoleName(), Level.INFO);
             }
         }
     }

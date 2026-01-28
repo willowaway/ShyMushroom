@@ -62,11 +62,6 @@ public class ActionTame extends ActionBase {
             return false;
         }
 
-        UUIDComponent playerIdComp = store.getComponent(refEntityStore, UUIDComponent.getComponentType());
-        if (playerIdComp == null) {
-            return false;
-        }
-
         ComponentType<EntityStore, NPCEntity> npcEntityComponentType = NPCEntity.getComponentType();
         if (npcEntityComponentType == null) {
             return false;
@@ -93,8 +88,7 @@ public class ActionTame extends ActionBase {
             return false;
         }
 
-        UUID playerId = playerIdComp.getUuid();
-        tameComponent.setIsTameByPlayer(playerId);
+        tameComponent.setIsTame(true);
         PetComponent petComponent =  store.ensureAndGetComponent(refEntityStore, PetComponent.getComponentType());
         petComponent.set(petId.getUuid(), world.getName(), "Nib");
 
@@ -104,11 +98,11 @@ public class ActionTame extends ActionBase {
             LOGGER.atSevere().log("Failed to set attitude of NPC to REVERED", e);
             return false;
         }
-
-        boolean oldState = npcEntity.updateSpawnTrackingState(false);
-        if (oldState) {
-            LOGGER.atInfo().log("Stopped tracking entity state for entity: %s".formatted(npcEntity.getRoleName()));
-        }
+//
+//        boolean oldState = npcEntity.updateSpawnTrackingState(false);
+//        if (oldState) {
+//            LOGGER.atInfo().log("Stopped tracking entity state for entity: %s".formatted(npcEntity.getRoleName()));
+//        }
 
         playerRef.sendMessage(Message.raw("You have tamed a wild %s".formatted(npcEntity.getRoleName())));
         return true;

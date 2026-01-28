@@ -138,6 +138,17 @@ public class NibletPlugin extends JavaPlugin {
                 return;
             }
 
+            PetComponent petComponent = worldStore.getComponent(playerEntityRef, PetComponent.getComponentType());
+            if (petComponent == null) {
+                LOGGER.atSevere().log("Failed to spawn pet: Pet Component was null");
+                return;
+            }
+
+            if (petComponent.getEntityId() == null) {
+                LOGGER.atInfo().log("No pet exists to spawn.");
+                return;
+            }
+
             ModelAsset modelAsset = ModelAsset.getAssetMap().getAsset("Niblet");
             if (modelAsset == null) {
                 LOGGER.atSevere().log("Failed to spawn pet: Model Asset for 'Niblet' not found");
@@ -154,27 +165,22 @@ public class NibletPlugin extends JavaPlugin {
                 LOGGER.atInfo().log("Successfully spawned pet Niblet");
             }
 
-            Ref<EntityStore> entityRef = spawnResult.first();
-            UUIDComponent uuidComponent = worldStore.getComponent(entityRef, UUIDComponent.getComponentType());
-            if (uuidComponent == null) {
+            Ref<EntityStore> petEntityRef = spawnResult.first();
+            UUIDComponent petIdComp = worldStore.getComponent(petEntityRef, UUIDComponent.getComponentType());
+            if (petIdComp == null) {
                 LOGGER.atSevere().log("Failed to spawn pet: UUIDComponent was null");
                 return;
             }
 
-            UUID entityID = uuidComponent.getUuid();
-            TameComponent tameComponent = worldStore.getComponent(entityRef, TameComponent.getComponentType());
+            UUID petId = petIdComp.getUuid();
+            TameComponent tameComponent = worldStore.getComponent(petEntityRef, TameComponent.getComponentType());
             if (tameComponent == null) {
                 LOGGER.atSevere().log("Failed to spawn pet: Tame Component was null");
                 return;
             }
-            tameComponent.setIsTameByPlayer(playerId);
+            tameComponent.setIsTame(true);
 
-            PetComponent petComponent = worldStore.getComponent(playerEntityRef, PetComponent.getComponentType());
-            if (petComponent == null) {
-                LOGGER.atSevere().log("Failed to spawn pet: Pet Component was null");
-                return;
-            }
-            petComponent.set(entityID, world.getName(), "Nib");
+            petComponent.set(petId, world.getName(), "Nib");
             LOGGER.atInfo().log("Successfully spawned pet Niblet and set owner to " + playerId);
 
             NPCEntity npcEntity = spawnResult.second();
@@ -184,7 +190,7 @@ public class NibletPlugin extends JavaPlugin {
                 return;
             }
 
-            role.getStateSupport().setState(entityRef, "Idle", "Follow", store);
+            role.getStateSupport().setState(petEntityRef, "Idle", "Follow", store);
             WorldSupport worldSupport = role.getWorldSupport();
             try {
                 NibletPlugin.getAttitudeField().set(worldSupport, Attitude.REVERED);
@@ -216,13 +222,21 @@ public class NibletPlugin extends JavaPlugin {
                 LOGGER.atInfo().log("On Player Disconnect: Failed to get Pet Component");
                 return;
             }
-            Ref<EntityStore> entityRef = world.getEntityStore().getRefFromUUID(petComponent.getEntityId());
+
+            UUID petEntityId = petComponent.getEntityId();
+            if (petEntityId == null) {
+                LOGGER.atInfo().log("On Player Disconnect pet %s already removed as a reference in Pet Component", petComponent.getName());
+                return;
+            }
+
+            Ref<EntityStore> entityRef = world.getEntityStore().getRefFromUUID(petEntityId);
 
             if (entityRef != null && entityRef.isValid()) {
                 store.removeEntity(entityRef, RemoveReason.REMOVE);
                 LOGGER.atInfo().log("On Player Disconnect successfully removed pet %s from the world", petComponent.getName());
             } else {
-                LOGGER.atSevere().log("On Player Disconnect failed: entityRef was null or invalid for petEntityId: %s", petComponent.getEntityId());
+                LOGGER.atInfo().log("On Player Disconnect: entityRef was null or invalid for petEntityId: %s. Attempting to remove reference to non-existent pet", petComponent.getEntityId());
+                petComponent.setEntityId(null);
             }
         });
     }

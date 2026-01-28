@@ -8,9 +8,10 @@ import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.willowaway.shymushroom.NibletPlugin;
 import lombok.Getter;
-import org.jspecify.annotations.Nullable;
+import lombok.Setter;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.UUID;
 
 @Getter
@@ -31,12 +32,14 @@ public class PetComponent implements Component<EntityStore> {
             .documentation("The World Name the pet belongs to").add()
             .build();
 
+    @Setter
+    @Nullable
     private UUID entityId;
     private String name;
     private String worldName;
 
     @Override
-    public @Nullable Component<EntityStore> clone() {
+    public Component<EntityStore> clone() {
         PetComponent petComponent = new PetComponent();
         petComponent.entityId = this.entityId;
         petComponent.name = this.name;

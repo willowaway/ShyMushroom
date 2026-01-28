@@ -25,7 +25,7 @@ public class SensorTamed extends SensorBase {
         if (tameComponent == null) {
             return false;
         } else {
-            return super.matches(ref, role, dt, store) && tameComponent.isTame() == this.isTamed;
+            return super.matches(ref, role, dt, store) && tameComponent.getIsTame() == this.isTamed;
         }
     }
 
